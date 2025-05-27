@@ -1,15 +1,15 @@
 import express from "express";
-import { addProject, deleteProject, getProject, updateProjet } from "../controllers/projectCoordinatorController.js";
+import { createProject, deleteProject, getProjects, updateProject } from "../controllers/projectCoordinatorController.js";
 import { auth, login } from "../controllers/authControler.js";
 import { addStudent, getStudent, removeStudent, updateStudent } from "../controllers/studentController.js";
 const router = express.Router()
 
 router.post('/login', login)
 
-router.get('/projetos', auth, getProject);
-router.post('/projetos', addProject);
+router.get('/projetos', auth, getProjects);
+router.post('/projetos', createProject);
 router.delete('/projetos/:id', deleteProject);
-router.put('/projetos/:id', updateProjet)
+router.put('/projetos/:id', updateProject)
 
 router.get('/bolsistas', auth, getStudent)
 router.post('/bolsistas', addStudent)

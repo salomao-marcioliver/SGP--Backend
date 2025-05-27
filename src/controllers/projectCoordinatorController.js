@@ -1,67 +1,52 @@
-import conn from "../database/db.js"
+import ProjetoCoordenador from '../models/projectCoordinatorModel.js';
 
-export const getProject = async (_, res) => {
-    const q = "select pc.codprojeto, pc.titulo, to_char( pc.data_inicio, 'DD/MM/YYYY') as data_inicio, to_char( pc.data_termino, 'DD/MM/YYYY') as data_termino , pc.codcoord, pc.nome_coord, pc.instituto_coord from projeto_coordenador pc;"
+export const getProjects = async (req, res) => {
+  try {
+    const projects = await ProjetoCoordenador.findAll();
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error('Erro ao buscar projetos:', error);
+    res.status(500).json({ message: 'Erro interno ao buscar projetos.' });
+  }
+};
 
-    conn.query(q, (err, data) => {
-        if (err) {
-            console.log(err)
-            return res.json(err)
-        } else {
-            return res.status(200).json(data.rows)
-        }
-    })
-}
+export const createProject = async (req, res) => {
+  try {
+    const project = await ProjetoCoordenador.create(req.body);
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Erro ao adicionar projeto:', error);
+    res.status(500).json({ message: 'Erro ao adicionar projeto.' });
+  }
+};
 
-export const addProject = (req, res) => {
-    const q = "insert into projeto_coordenador (titulo, data_inicio, data_termino, codCoord, nome_coord, instituto_coord) values ($1, $2, $3, $4, $5, $6);"
-    conn.query(q, 
-        [
-            req.body.titulo, 
-            req.body.data_inicio, 
-            req.body.data_termino, 
-            req.body.codCoord, 
-            req.body.nome_coord,
-            req.body.instituto_coord
-        ], (err) => {
-        if (err) {
-            res.json(err);
-            console.log(err)
-        } else {
-            res.status(200).json("Projeto adicionado com sucesso!")
-        }
-    })
-}
+export const updateProject = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const [updated] = await ProjetoCoordenador.update(req.body, { where: { codprojeto: id } });
+    if (updated) {
+      const updatedProject = await ProjetoCoordenador.findByPk(id);
+      res.status(200).json(updatedProject);
+    } else {
+      res.status(404).json({ message: 'Projeto não encontrado.' });
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar projeto:', error);
+    res.status(500).json({ message: 'Erro ao atualizar projeto.' });
+  }
+};
 
-export const deleteProject = (req, res) => {
-    const q = `DELETE FROM projeto_coordenador p WHERE p.codprojeto = $1`;
-
-    conn.query(q, [req.params.id], (err) => {
-        if (err) {
-            return res.json(err);
-        } else {
-            return res.status(200).json("Usuário deletado com sucesso.")
-        }
-    });
-}
-
-export const updateProjet = (req, res) => {
-    const q = `update projeto_coordenador set titulo = $1, data_inicio = $2, data_termino = $3, codcoord = $4, nome_coord = $5, instituto_coord = $6 where codprojeto = $7; `
-    
-    conn.query(q, 
-        [
-            req.body.titulo,
-            req.body.data_inicio,
-            req.body.data_termino, 
-            req.body.codCoord, 
-            req.body.nome_coord,
-            req.body.instituto_coord,
-            req.params.id
-         ], (err) => {
-            if(err){
-                return res.json(err);
-            }else{
-                res.status(200).json("Projeto atualizado com sucesso.");
-            }
-        })
-}
+export const deleteProject = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const deleted = await ProjetoCoordenador.destroy({ where: { codprojeto: id } });
+    if (deleted) {
+      res.status(200).json({ message: 'Projeto deletado com sucesso!' });
+    } else {
+      res.status(404).json({ message: 'Projeto não encontrado.' });
+    }
+  } catch (error) {
+    console.error('Erro ao deletar projeto:', error);
+    res.status(500).json({ message: 'Erro ao deletar projeto.' });
+  }
+};
