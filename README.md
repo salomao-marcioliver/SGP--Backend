@@ -1,101 +1,130 @@
+# 📦 Backend - Sistema de Gestão de Projetos (SGP)
 
-# 📦 Backend - Sistema de Gestão de Projetos e Coordenadores
+Este é o backend do sistema SGP, desenvolvido em **Node.js (Express.js)**, utilizando **Prisma ORM** para acesso ao banco de dados PostgreSQL.
 
-Este é o backend do sistema de gerenciamento de projetos, coordenadores e cursos, desenvolvido em Node.js com Sequelize e Express. Ele fornece uma API RESTful que permite criar, editar e listar informações relacionadas aos projetos acadêmicos.
-
-## 🚀 Tecnologias Utilizadas
-
-- **Node.js** – Ambiente de execução JavaScript
-- **Express** – Framework web para Node.js
-- **Sequelize** – ORM para integração com banco de dados relacional
-- **PostgreSQL** – Banco de dados utilizado no ambiente de produção
-- **Dotenv** – Gerenciamento de variáveis de ambiente
-- **Nodemon** – Monitoramento de alterações durante o desenvolvimento
-- **Sequelize CLI** – Gerador e executor de migrations e models
-
-## 📁 Estrutura de Pastas
+## 📁 Estrutura do Projeto
 
 ```
-.
-├── config/               # Configurações do banco (Sequelize)
-├── controllers/          # Lógica dos endpoints da API
-├── migrations/           # Scripts de criação/alteração de tabelas
-├── models/               # Definições de Models do Sequelize
-├── routes/               # Arquivo principal de rotas da API
-├── seeders/              # Dados iniciais (se necessário)
-├── .env                  # Variáveis de ambiente
-├── server.js             # Arquivo principal do servidor
-└── README.md             # Documentação do projeto
+SGP/
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+├── src/
+│   ├── controllers/
+│   ├── lib/
+│   ├── routes/
+│   └── index.js
+├── .env
+├── package.json
+└── README.md
 ```
 
-## 🧪 Instalação e Execução
+## 🚀 Tecnologias
 
-### 1. Clone o repositório
+- Node.js
+- Express.js
+- Prisma ORM
+- PostgreSQL
+- JWT (Autenticação)
+- Nodemon (Ambiente de desenvolvimento)
+
+---
+
+## ⚙️ Pré-requisitos
+
+- Node.js (v18 ou superior)
+- PostgreSQL
+- npm ou yarn
+
+---
+
+## 🔧 Configuração Inicial
+
+### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-repo-backend.git
-cd nome-do-repo-backend
+git clone https://github.com/seu-usuario/sgp-backend.git
+cd sgp-backend
 ```
 
-### 2. Instale as dependências
+### 2. Instalar dependências
 
 ```bash
 npm install
 ```
 
-### 3. Configure as variáveis de ambiente
+### 3. Configurar o banco de dados
 
-Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
+Crie um banco PostgreSQL chamado `sgp_db` (ou o nome que preferir).
 
-```env
-NODE_ENV=development
-PORT=3000
+Depois, configure o arquivo `.env`:
 
 ```
-
-> **Nota:** Você pode adaptar para PostgreSQL adicionando as variáveis abaixo:
-
-```env
-DB_HOST=localhost
-DB_USER=seu_usuario
-DB_PASS=sua_senha
-DB_NAME=seu_banco
-DB_DIALECT=postgres
+DATABASE_URL="postgresql://usuario:senha@localhost:5432/sgp_db?schema=public"
+JWT_SECRET="seu_segredo_jwt"
 ```
 
-### 4. Execute as migrations
+### 4. Gerar o cliente Prisma e aplicar migrações
 
 ```bash
-npx sequelize-cli db:migrate
+npx prisma migrate dev --name init
 ```
 
-### 5. Inicie o servidor
+> Isso criará as tabelas necessárias no banco com base no `schema.prisma`.
+
+---
+
+## ▶️ Rodar o servidor em modo dev
 
 ```bash
 npm run dev
 ```
 
-A aplicação estará disponível em: `http://localhost:3000`
+> O servidor será iniciado em `http://localhost:3000`.
 
-## 📌 Endpoints Principais
+---
 
-| Método | Rota                        | Descrição                          |
-|--------|-----------------------------|------------------------------------|
-| GET    | /projetos                   | Lista todos os projetos            |
-| POST   | /projetos                   | Cria um novo projeto               |
-| PUT    | /projetos/:id               | Atualiza um projeto existente      |
-| DELETE | /projetos/:id               | Remove um projeto                  |
-| GET    | /coordenadores              | Lista todos os coordenadores       |
-| POST   | /coordenadores              | Cria um novo coordenador           |
+## 🛠 Rotas disponíveis
 
+### Autenticação
 
-## ✅ Funcionalidades
+| Método | Rota        | Descrição          |
+|--------|-------------|--------------------|
+| POST   | `/login`    | Realiza login JWT  |
 
-- Cadastro de projetos
-- Vínculo de coordenadores aos projetos
-- CRUD completo via API REST
-- Integração com banco de dados relacional
+### Projetos
+
+| Método | Rota            | Descrição                 |
+|--------|------------------|---------------------------|
+| GET    | `/projetos`      | Lista todos os projetos   |
+| POST   | `/projetos`      | Cria um novo projeto      |
+| PUT    | `/projetos/:id`  | Atualiza um projeto       |
+| DELETE | `/projetos/:id`  | Remove um projeto         |
+
+### Bolsistas
+
+| Método | Rota             | Descrição                   |
+|--------|------------------|-----------------------------|
+| GET    | `/bolsistas`     | Lista todos os bolsistas    |
+| POST   | `/bolsistas`     | Cria um novo bolsista       |
+| PUT    | `/bolsistas/:id` | Atualiza um bolsista        |
+| DELETE | `/bolsistas/:id` | Remove um bolsista          |
+
+---
+
+## 🧪 Testar API
+
+Você pode usar o [Insomnia](https://insomnia.rest/) ou [Postman](https://www.postman.com/) para testar os endpoints.
+
+---
+
+## 📌 Observações
+
+- O campo `num_matricula` é **único** no banco de dados.
+- Use o token JWT retornado no login para autenticar rotas protegidas (`Authorization: Bearer SEU_TOKEN`).
+
+---
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto é acadêmico e livre para fins educacionais.
