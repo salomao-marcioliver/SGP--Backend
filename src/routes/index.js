@@ -1,21 +1,39 @@
-import express from "express";
-import { createProject, deleteProject, getProjects, updateProject } from "../controllers/projectCoordinatorController.js";
-import { auth, login } from "../controllers/authControler.js";
-import { addStudent, getStudent, removeStudent, updateStudent } from "../controllers/studentController.js";
-const router = express.Router()
+import express from 'express';
 
-router.post('/login', login)
+// Controllers de autenticação
+import { auth, login } from '../controllers/authController.js';
 
+// Controllers de projeto
+import {
+    getProjects,
+    addProject,
+    updateProject,
+    deleteProject,
+} from '../controllers/projectCoordinatorController.js';
+
+// Controllers de bolsistas
+import {
+    getStudents,
+    addStudent,
+    updateStudent,
+    removeStudent,
+} from '../controllers/studentController.js';
+
+const router = express.Router();
+
+// Autenticação
+router.post('/login', login);
+
+// Projetos
 router.get('/projetos', auth, getProjects);
-router.post('/projetos', createProject);
-router.delete('/projetos/:id', deleteProject);
-router.put('/projetos/:id', updateProject)
+router.post('/projetos', auth, addProject);
+router.put('/projetos/:id', auth, updateProject);
+router.delete('/projetos/:id', auth, deleteProject);
 
-router.get('/bolsistas', auth, getStudent)
-router.post('/bolsistas', addStudent)
-router.delete('/bolsistas/:id', removeStudent)
-router.put('/bolsistas/:id', updateStudent)
-
-
+// Bolsistas
+router.get('/bolsistas', auth, getStudents);
+router.post('/bolsistas', auth, addStudent);
+router.put('/bolsistas/:id', auth, updateStudent);
+router.delete('/bolsistas/:id', auth, removeStudent);
 
 export default router;

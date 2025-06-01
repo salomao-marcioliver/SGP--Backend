@@ -1,52 +1,76 @@
-import ProjetoCoordenador from '../models/projectCoordinatorModel.js';
+import { prisma } from '../lib/prisma.js';
 
+// Buscar todos os projetos
 export const getProjects = async (req, res) => {
   try {
-    const projects = await ProjetoCoordenador.findAll();
-    res.status(200).json(projects);
+    const projetos = await prisma.projetoCoordenador.findMany();
+    return res.status(200).json(projetos);
   } catch (error) {
     console.error('Erro ao buscar projetos:', error);
-    res.status(500).json({ message: 'Erro interno ao buscar projetos.' });
+    return res.status(500).json({ error: 'Erro ao buscar projetos' });
   }
 };
 
-export const createProject = async (req, res) => {
+// Adicionar novo projeto
+export const addProject = async (req, res) => {
+  const { titulo, data_inicio, data_termino, codcoord, nome_coord, instituto_coord } = req.body;
+
   try {
-    const project = await ProjetoCoordenador.create(req.body);
-    res.status(201).json(project);
+    await prisma.projetoCoordenador.create({
+      data: {
+        titulo,
+        data_inicio: new Date(data_inicio),
+        data_termino: new Date(data_termino),
+        codcoord: Number(codcoord),
+        nome_coord,
+        instituto_coord,
+      },
+    });
+
+    return res.status(201).json('Projeto adicionado com sucesso!');
   } catch (error) {
     console.error('Erro ao adicionar projeto:', error);
-    res.status(500).json({ message: 'Erro ao adicionar projeto.' });
+    return res.status(500).json({ error: 'Erro ao adicionar projeto' });
   }
 };
 
+// Atualizar projeto
 export const updateProject = async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
+  const { titulo, data_inicio, data_termino, codCoord, nome_coord, instituto_coord } = req.body;
+
   try {
-    const [updated] = await ProjetoCoordenador.update(req.body, { where: { codprojeto: id } });
-    if (updated) {
-      const updatedProject = await ProjetoCoordenador.findByPk(id);
-      res.status(200).json(updatedProject);
-    } else {
-      res.status(404).json({ message: 'Projeto não encontrado.' });
-    }
+    await prisma.projetoCoordenador.update({
+      where: { codprojeto: Number(id) },
+      data: {
+        titulo,
+        data_inicio: new Date(data_inicio),
+        data_termino: new Date(data_termino),
+        codcoord: codCoord,
+        nome_coord,
+        instituto_coord,
+      },
+    });
+
+    return res.status(200).json('Projeto atualizado com sucesso.');
   } catch (error) {
     console.error('Erro ao atualizar projeto:', error);
-    res.status(500).json({ message: 'Erro ao atualizar projeto.' });
+    return res.status(500).json({ error: 'Erro ao atualizar projeto' });
   }
 };
 
+// Deletar projeto
 export const deleteProject = async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
+
   try {
-    const deleted = await ProjetoCoordenador.destroy({ where: { codprojeto: id } });
-    if (deleted) {
-      res.status(200).json({ message: 'Projeto deletado com sucesso!' });
-    } else {
-      res.status(404).json({ message: 'Projeto não encontrado.' });
-    }
+    await prisma.projetoCoordenador.delete({
+      where: { codprojeto: Number(id) },
+    });
+
+    return res.status(200).json('Projeto deletado com sucesso.');
   } catch (error) {
     console.error('Erro ao deletar projeto:', error);
-    res.status(500).json({ message: 'Erro ao deletar projeto.' });
+    return res.status(500).json({ error: 'Erro ao deletar projeto' });
   }
 };

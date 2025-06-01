@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// prisma/schema.prisma
+
+
+model ProjetoCoordenador {
+  codprojeto      Int        @id @default(autoincrement())
+  titulo          String
+  data_inicio     DateTime
+  data_termino    DateTime
+  codcoord        Int
+  nome_coord      String
+  instituto_coord String
+
+  bolsistas       Bolsista[] // 1 projeto pode ter vários bolsistas
+}
+
+model Bolsista {
+  num_matricula   BigInt        @id
+  nome            String
+  data_nascimento DateTime
+  curso           String
+  instituto       String
+  codprojeto      Int
+
+  projeto         ProjetoCoordenador @relation(fields: [codprojeto], references: [codprojeto], onDelete: Cascade)
+}

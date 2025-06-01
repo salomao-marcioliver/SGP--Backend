@@ -1,65 +1,93 @@
-import conn from "../config/database.js";
+import { prisma } from '../lib/prisma.js';
 
-export const getStudent = async(_, res) => {
-    const q = "select b.num_matricula, b.nome, b.curso, to_char( b.data_nascimento, 'DD/MM/YYYY') as data_nascimento, b.instituto, b.codprojeto, pc.titulo, pc.nome_coord from bolsista b join projeto_coordenador pc on b.codprojeto = pc.codprojeto;"
-
-    conn.query(q, (err, data) => {
-        if(err){
-            return res.json(err)
-        }else{
-            return res.status(200).json(data.rows);
-        }
+// Buscar todos os bolsistas com info do projeto
+export const getStudents = async (req, res) => {
+  try {
+    const bolsistas = await prisma.bolsista.findMany({
+      include: {
+        projeto: {
+          select: {
+            titulo: true,
+            nome_coord: true,
+          },
+        },
+      },
     });
-}
 
-export const addStudent = async(req, res) => {
-  const q = 'insert into bolsista (num_matricula, nome, data_nascimento, curso, instituto, codprojeto) values ($1, $2, $3, $4, $5, $6)'
+    // Converte os campos BigInt para string
+    const serialized = bolsistas.map((b) => ({
+      ...b,
+      num_matricula: b.num_matricula.toString(),
+      codprojeto: b.codprojeto, // opcional: se também for BigInt, use .toString()
+    }));
 
-  conn.query(q, [
-    req.body.num_matricula,
-    req.body.nome,
-    req.body.data_nascimento,
-    req.body.curso,
-    req.body.instituto,
-    req.body.codprojeto
-  ], (err) => {
-    if(err){
-      res.json(err)
-    }else{
-      res.status(200).json("Bolsista adicionado com sucesso!")
-    } 
-  })
-}
+    return res.status(200).json(serialized);
+  } catch (error) {
+    console.error('Erro ao buscar bolsistas:', error);
+    return res.status(500).json({ error: 'Erro ao buscar bolsistas' });
+  }
+};
 
-export const removeStudent = (req, res) => {
-  const q = "delete from bolsista where num_matricula = $1"
+// Adicionar novo bolsista
+export const addStudent = async (req, res) => {
+  const { num_matricula, nome, data_nascimento, curso, instituto, codprojeto } = req.body;
 
-  conn.query(q, [req.params.id], (err) => {
-    if(err){
-      res.json(err)
-      console.log(err)
-    }else{
-      res.status(200).json("Bolsista removido com sucesso!")
-    }
-  })
-}
+  try {
+    await prisma.bolsista.create({
+      data: {
+        num_matricula: BigInt(num_matricula),
+        nome,
+        data_nascimento: new Date(data_nascimento),
+        curso,
+        instituto,
+        codprojeto: Number(codprojeto),
+      },
+    });
 
-export const updateStudent = (req, res) => {
-  const q = "update bolsista set num_matricula = $1, nome = $2, data_nascimento = $3, curso = $4, instituto = $5, codprojeto = $6 where num_matricula = $7;"
+    return res.status(201).json('Bolsista adicionado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao adicionar bolsista:', error);
+    return res.status(500).json({ error: 'Erro ao adicionar bolsista' });
+  }
+};
 
-  conn.query(q, [
-    req.body.num_matricula,
-    req.body.nome,
-    req.body.data_nascimento,
-    req.body.curso,
-    req.body.instituto,
-    req.body.codprojeto,
-    req.params.id
-  ], (err) => {
-    if(err) {
-      res.json(err);
-    }else{
-      res.status(200).json('Os dados do bolsista foram atualizados com sucesso!')
-    }
-  })
-}
+// Atualizar bolsista
+export const updateStudent = async (req, res) => {
+  const { id } = req.params;
+  const { num_matricula, nome, data_nascimento, curso, instituto, codprojeto } = req.body;
+
+  try {
+    await prisma.bolsista.update({
+      where: { num_matricula: BigInt(id) },
+      data: {
+        num_matricula: BigInt(num_matricula),
+        nome,
+        data_nascimento: new Date(data_nascimento),
+        curso,
+        instituto,
+        codprojeto: Number(codprojeto),
+      },
+    });
+
+    return res.status(200).json('Bolsista atualizado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao atualizar bolsista:', error);
+    return res.status(500).json({ error: 'Erro ao atualizar bolsista' });
+  }
+};
+
+// Remover bolsista
+export const removeStudent = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.bolsista.delete({
+      where: { num_matricula: BigInt(id) },
+    });
+
+    return res.status(200).json('Bolsista removido com sucesso!');
+  } catch (error) {
+    console.error('Erro ao remover bolsista:', error);
+    return res.status(500).json({ error: 'Erro ao remover bolsista' });
+  }
+};
